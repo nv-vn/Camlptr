@@ -15,6 +15,11 @@ external puts : alloc ptr -> unit = "puts_stub"
 external address : alloc ptr -> int64 = "%identity"
 external pointer : int64 -> alloc ptr = "%identity"
 
+let ( !* ) = deref
+let ( ^= ) = assign
+let ( ^+ ) = offset
+let ( !& ) = getref
+
 let with_ptr : alloc ptr -> (alloc ptr -> free ptr) -> unit =
   fun ptr run ->
     run ptr |> ignore
