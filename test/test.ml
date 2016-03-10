@@ -3,7 +3,7 @@ open Camlptr
 let test1 () =
   print_endline "Allocating 1 byte";
   with_ptr (alloc 1) begin fun ptr ->
-    ptr |> deref |> string_of_int |> print_endline;
+    !*ptr |> string_of_int |> print_endline;
     print_endline "Freeing 1 byte";
     free ptr
   end
@@ -14,9 +14,9 @@ let test2 () =
     for i = 0 to 9 do
       Printf.printf "On char %d\n%!" i;
       let off = Int64.of_int i in
-      ignore @@ assign (offset ptr off) 'a'
+      (ptr ^+ off) ^= 'a'
     done;
-    ignore @@ assign (offset ptr 10L) 0;
+    (ptr ^+ 10L) ^= 0;
     puts ptr;
     free ptr
   end

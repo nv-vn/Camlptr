@@ -12,11 +12,14 @@ external getref : 'a -> 'b ptr = "getref_stub"
 
 external puts : alloc ptr -> unit = "puts_stub"
 
-external address : alloc ptr -> int64 = "%identity"
-external pointer : int64 -> alloc ptr = "%identity"
+external address : 'a ptr -> int64 = "%identity"
+external pointer : int64 -> 'a ptr = "pointer_stub"
+
+let mutate ptr value =
+  ignore (assign ptr value)
 
 let ( !* ) = deref
-let ( ^= ) = assign
+let ( ^= ) = mutate
 let ( ^+ ) = offset
 let ( !& ) = getref
 
@@ -29,9 +32,9 @@ let encode_string : string -> alloc ptr =
     let len = String.length str in
     let ptr = alloc (len + 1) in
     String.iteri begin fun i c ->
-      let ptr' = offset ptr (Int64.of_int i) in
-      assign ptr' c |> ignore
+      let ptr' = ptr ^+ (Int64.of_int i) in
+      ptr' ^= c
     end str;
-    let last = offset ptr (Int64.of_int len) in
-    assign last 0 |> ignore;
+    let last = ptr ^+ (Int64.of_int len) in
+    last ^= 0;
     ptr

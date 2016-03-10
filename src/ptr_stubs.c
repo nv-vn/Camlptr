@@ -7,25 +7,22 @@
 #include <caml/callback.h>
 
 CAMLprim value deref_stub(value addr) {
-  long addr_ = addr;
   int *ptr;
-  ptr = (int *) addr_;
+  ptr = (int *) addr;
   return Val_int(*ptr);
 }
 
 CAMLprim value assign_stub(value addr, value val) {
-  long addr_ = addr;
   int val_ = Int_val(val);
   int *ptr;
-  ptr = (int *) addr_;
+  ptr = (int *) addr;
   *ptr = val_;
   return Val_unit;
 }
 
 CAMLprim value offset_stub(value addr, value off) {
-  long addr_ = addr;
   long off_ = Int64_val(off);
-  long result = addr_ + off_;
+  long result = addr + off_;
   return result;
 }
 
@@ -36,8 +33,7 @@ CAMLprim value alloc_stub(value size) {
 }
 
 CAMLprim value free_stub(value addr) {
-  long addr_ = addr;
-  free((void *) addr_);
+  free((void *) addr);
 
   return Val_unit;
 }
@@ -48,9 +44,13 @@ CAMLprim value getref_stub(value ptr) {
   return addr_;
 }
 
+CAMLprim value pointer_stub(value addr) { // How can we define the inverse?
+  long addr_ = Long_val(addr);
+  return addr_;
+}
+
 CAMLprim value puts_stub(value addr) {
-  long addr_ = addr;
-  char *str = (char *) addr_;
+  char *str = (char *) addr;
   puts(str);
   return Val_unit;
 }
