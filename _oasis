@@ -1,0 +1,23 @@
+Name: Camlptr
+Version: 0.1
+Synopsis: Low-level pointer manipulation library
+Authors: nv-vn <nv@cock.li>
+License: GPL
+
+OASISFormat: 0.4
+BuildTools: ocamlbuild
+Plugins: META (0.4), DevFiles (0.4)
+
+Library "camlptr"
+  Path: src/
+  Modules: Camlptr
+  CSources: ptr_stubs.c
+# CCLib: -l...
+  CCOpt: -W -Wall -O2 -c
+
+Executable "camlptr_test"
+  Path: test/
+  Install: false
+  MainIs: test.ml
+  BuildDepends: camlptr
+  CompiledObject: native
