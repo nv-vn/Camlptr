@@ -35,8 +35,25 @@ let test4 () =
   let ptr = getref num in
   puts ptr
 
+let test5 () =
+  let module IntCell = struct
+    type t = int
+    let size = 4 (* bytes *)
+  end in
+  let module IntArray  = Array  (IntCell) in
+  let module IntVector = Vector (IntCell) in
+
+  let arr = IntArray.create 10 in
+  IntArray.mapi (fun i _ -> i + 1) 10 arr;
+  IntArray.iter (fun n -> print_endline (string_of_int n)) 10 arr;
+
+  let vec = IntVector.create 10 in
+  IntVector.mapi (fun i _ -> i + 1) vec;
+  IntVector.iter (fun n -> print_endline (string_of_int n)) vec
+
 let () =
   test1 ();
   test2 ();
   test3 ();
-  test4 ()
+  test4 ();
+  test5 ()
