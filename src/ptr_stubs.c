@@ -44,7 +44,7 @@ CAMLprim value getref_stub(value ptr) {
   return addr_;
 }
 
-CAMLprim value pointer_stub(value addr) { // How can we define the inverse?
+CAMLprim value pointer_stub(value addr) { // TODO: How can we define the inverse?
   long addr_ = Long_val(addr);
   return addr_;
 }

@@ -51,9 +51,10 @@ let ( ^+ ) = offset
 let ( !& ) = getref
 
 (** Run a function with a pointer, making sure it is deallocated by the end of the function *)
-let with_ptr : ('a, alloc) ptr -> (('a, alloc) ptr -> ('a, free) ptr) -> unit =
+let with_ptr : ('a, alloc) ptr -> (('a, alloc) ptr -> unit) -> unit =
   fun ptr run ->
-    run ptr |> ignore
+    run ptr;
+    free ptr |> ignore
 
 let encode_string : string -> (char, alloc) ptr =
   fun str ->
