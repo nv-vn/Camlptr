@@ -7,15 +7,15 @@ end
 
 (** Unsized array, not necessarily null-terminated *)
 module Array (Cell : ARRAY_CELL) = struct
-  type _ array = alloc ptr
+  type 'a array = ('a, alloc) ptr
 
   let create : int -> Cell.t array = fun length ->
     let size = Cell.size * length in
     alloc size
 
-  let delete : Cell.t array -> free ptr = free
+  let delete : Cell.t array -> (Cell.t, free) ptr = free
 
-  let index : Cell.t array -> int -> alloc ptr = fun arr i ->
+  let index : Cell.t array -> int -> (Cell.t, alloc) ptr = fun arr i ->
     arr ^+ (Int64.of_int (i * Cell.size))
 
   let value : Cell.t array -> int -> Cell.t = fun arr i ->
@@ -47,7 +47,7 @@ end
 
 (** Sized array *)
 module Vector (Cell : ARRAY_CELL) = struct
-  type _ array = int * alloc ptr
+  type 'a array = int * ('a, alloc) ptr
 
   let create : int -> Cell.t array = fun length ->
     let size = Cell.size * length in
@@ -55,10 +55,10 @@ module Vector (Cell : ARRAY_CELL) = struct
 
   let length : Cell.t array -> int = fun (length, _) -> length
 
-  let delete : Cell.t array -> free ptr = fun arr ->
+  let delete : Cell.t array -> (Cell.t, free) ptr = fun arr ->
     free (snd arr)
 
-  let index : Cell.t array -> int -> alloc ptr = fun arr i ->
+  let index : Cell.t array -> int -> (Cell.t, alloc) ptr = fun arr i ->
     (snd arr) ^+ (Int64.of_int (i * Cell.size))
 
   let value : Cell.t array -> int -> Cell.t = fun arr i ->

@@ -1,33 +1,61 @@
+(** Phantom type for allocated pointer *)
 type alloc = Alloc
+
+(** Phantom type for freed/unallocated pointer *)
 type free = Free
 
-type _ ptr = int64
+(** Type for pointers, equivalent to int64 for now *)
+type ('a, _) ptr = int64
 
-external deref : alloc ptr -> 'a = "deref_stub"
-external assign : alloc ptr -> 'a -> alloc ptr = "assign_stub"
-external offset : 'a ptr -> int64 -> 'a ptr = "offset_stub"
-external alloc : int -> alloc ptr = "alloc_stub"
-external free  : alloc ptr -> free ptr = "free_stub"
-external getref : 'a -> 'b ptr = "getref_stub"
+(** Dereference an allocated pointer and get its value *)
+external deref : ('a, alloc) ptr -> 'a = "deref_stub"
 
-external puts : alloc ptr -> unit = "puts_stub"
+(** Assign a new value to an allocated pointer *)
+external assign : ('a, alloc) ptr -> 'a -> ('a, alloc) ptr = "assign_stub"
 
-external address : 'a ptr -> int64 = "%identity"
-external pointer : int64 -> 'a ptr = "pointer_stub"
+(** Perform pointer arithmetic by adding a specified offset to a pointer's address *)
+external offset : ('a, 'status) ptr -> int64 -> ('a, 'status) ptr = "offset_stub"
 
+(** Allocate a new pointer with the available `malloc` function *)
+external alloc : int -> ('a, alloc) ptr = "alloc_stub"
+
+(** Free an existing pointer with the available `free` function *)
+external free  : ('a, alloc) ptr -> ('a, free) ptr = "free_stub"
+
+(** Get a pointer to an OCaml value... very unsafe *)
+external getref : 'a -> ('a, 'status) ptr = "getref_stub"
+
+(** Call the available `puts` function with a char pointer *)
+external puts : (char, alloc) ptr -> unit = "puts_stub"
+
+(** Get the address of a pointer as an int64. Somewhat broken :^) *)
+external address : ('a, 'status) ptr -> int64 = "%identity"
+
+(** Get the pointer to an address in memory *)
+external pointer : int64 -> ('a, 'status) ptr = "pointer_stub"
+
+(** Like `assign`, but returns () *)
 let mutate ptr value =
   ignore (assign ptr value)
 
+(** Deref operator *)
 let ( !* ) = deref
+
+(** Mutate/assignment operator *)
 let ( ^= ) = mutate
+
+(** Offset/pointer arithmetic operator *)
 let ( ^+ ) = offset
+
+(** Referencing operator *)
 let ( !& ) = getref
 
-let with_ptr : alloc ptr -> (alloc ptr -> free ptr) -> unit =
+(** Run a function with a pointer, making sure it is deallocated by the end of the function *)
+let with_ptr : ('a, alloc) ptr -> (('a, alloc) ptr -> ('a, free) ptr) -> unit =
   fun ptr run ->
     run ptr |> ignore
 
-let encode_string : string -> alloc ptr =
+let encode_string : string -> (char, alloc) ptr =
   fun str ->
     let len = String.length str in
     let ptr = alloc (len + 1) in
